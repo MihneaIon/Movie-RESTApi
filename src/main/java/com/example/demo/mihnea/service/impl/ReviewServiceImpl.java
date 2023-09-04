@@ -51,6 +51,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void deleteReview(Long id) {
         Review review = this.findById(id);
+        review.setMovie(null);
         entityManager.remove(review);
     }
 

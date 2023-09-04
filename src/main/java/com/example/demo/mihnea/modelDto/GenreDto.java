@@ -1,15 +1,22 @@
 package com.example.demo.mihnea.modelDto;
 
+import com.example.demo.mihnea.model.GenreEnum;
 import com.example.demo.mihnea.model.Movie;
 
 import java.util.List;
 
 public class GenreDto {
 
-    public GenreDto(Long id, String name, List<Movie> movie) {
+    private Long id;
+
+    private String name;
+
+    private List<MovieDto> movie;
+
+    public GenreDto(Long id, String name, List<MovieDto> movieDto) {
         this.id = id;
         this.name = name;
-        this.movie = movie;
+        this.movie = movieDto;
     }
 
     public GenreDto(Long id, String name) {
@@ -19,12 +26,6 @@ public class GenreDto {
 
     public GenreDto() {
     }
-
-    private Long id;
-
-    private String name;
-
-    private List<Movie> movie;
 
     public Long getId() {
         return id;
@@ -42,11 +43,11 @@ public class GenreDto {
         this.name = name;
     }
 
-    public List<Movie> getMovie() {
+    public List<MovieDto> getMovie() {
         return movie;
     }
 
-    public void setMovie(List<Movie> movie) {
+    public void setMovie(List<MovieDto> movie) {
         this.movie = movie;
     }
 }

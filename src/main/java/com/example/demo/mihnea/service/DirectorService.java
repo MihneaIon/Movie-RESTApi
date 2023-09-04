@@ -11,11 +11,11 @@ public interface DirectorService {
 
     Director findById(Integer id);
 
-    List<Director> findAllDirector();
+    List<DirectorDto> findAllDirector();
 
     void deleteDirector(Integer id);
 
-    List<Director> getDirectorWithMoreThanXMovies(int numberOfMovies);
+    List<DirectorDto> getDirectorWithMoreThanXMovies(int movieCount);
 
     Director updateDirector(DirectorDto directorDto);
 }

@@ -13,9 +13,11 @@ public interface DirectorResource {
     //
     public ResponseEntity<Director> findDirectorById(@PathVariable Long id);
 
-    public ResponseEntity<List<Director>> findAllDirector();
+    public ResponseEntity<List<DirectorDto>> findAllDirector();
 
     public ResponseEntity<Director> updateDirector(DirectorDto directorDto);
 
     public ResponseEntity<Void> deleteDirector(@PathVariable Long id);
+
+    public ResponseEntity<List<DirectorDto>> getDirectorWithMoreThanXMovies(int movieCount);
 }

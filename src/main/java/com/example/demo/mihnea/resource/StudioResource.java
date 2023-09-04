@@ -13,12 +13,14 @@ public interface StudioResource {
 //
     public ResponseEntity<StudioDto> findStudioById(@PathVariable Integer id);
 
-    public ResponseEntity<List<Studio>> findAllStudies();
+    public ResponseEntity<List<StudioDto>> findAllStudies();
 
     public ResponseEntity<Studio> updateStudio(StudioDto studioDto);
 
     public ResponseEntity<Void> deleteStudio(@PathVariable Integer id);
 
     public List<StudioDto> getStudioWithMoreThenOneMovie();
+
+    public ResponseEntity<StudioDto> getStudioWithEagerLoadedMovies(Integer id);
 
 }

@@ -17,6 +17,7 @@ import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import springfox.documentation.annotations.Cacheable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,7 +63,7 @@ public class MovieServiceImpl implements MovieService {
 //    private MovieMapper movieMapper;
 
     @Override
-    public Movie create(MovieDto movieDto) {
+    public MovieDto create(MovieDto movieDto) {
         Director director = directorRepsoitory.findByName(movieDto.getDirectorDto().getName());
         if (director == null) {
             director = directorRepsoitory.save(new Director(movieDto.getDirectorDto().getName()));
@@ -95,32 +96,35 @@ public class MovieServiceImpl implements MovieService {
             studio = studioRepository.save(new Studio(movieDto.getStudioDto().getName()));
         }
 
-        List<Review> reviews = reviewRepository.saveAll(
-                movieDto.getReviewDtos().stream()
-                        .map(reviewDto -> new Review(reviewDto.getComment()))
-                        .collect(Collectors.toList())
-        );
+        List<Review> reviews = new ArrayList<>();
+        for(ReviewDto reviewDto : movieDto.getReviewDtos()){
+            Review existingReview = reviewRepository.findById(reviewDto.getId()).get();
+            if(existingReview == null){
+                reviews.add(new Review(reviewDto.getComment()));
+            } else {
+                reviews.add(existingReview);
+            }
+        }
 
         Movie movie = new Movie();
         movie.setTitle(movieDto.getTitle());
+        movie.setMovieStatus(movieDto.getMovieStatus());
         movie.setDirector(director);
         movie.setGenres(genres);
         movie.setActors(actors);
         movie.setStudio(studio);
         movie.setReviews(reviews);
 
-        return movieRepository.save(movie);
+        movieRepository.save(movie);
+
+        return convertEntityToDto(movie);
     }
 
     @Override
+    @Cacheable(value = "movie")
     public MovieDto findById(Long id) {
-        try{
             Movie movie = movieRepository.findById(id).orElse(null);
             return convertEntityToDto(movie);
-        }catch (StackOverflowError e){
-            System.out.println("!!!"+e);
-        }
-        return null;
     }
 
     @Override
@@ -129,14 +133,25 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
+    @Transactional
     public void deleteMovie(Long id) {
-        MovieDto movieDto = this.findById(id);
-        //entityManager.remove(movie);
+        if(movieRepository.existsById(id)){
+            movieRepository.deleteById(id);
+        }
     }
 
     @Override
-    public Movie updateMovie(MovieDto movieDto) {
-        return null;
+    public MovieDto updateMovie(MovieDto movieDto) {
+        try {
+            Movie movie = movieRepository.findById(movieDto.getId()).get();
+            Movie savedMovie = updateAttributes(movieDto, movie);
+            movieRepository.saveAndFlush(movie);
+            return convertEntityToDto(movie);
+        }catch (Exception e){
+            e.printStackTrace();
+            //return new EntityNotFoundException("Movie with ID " + movieDto.getId() + " not found");
+            return null;
+        }
     }
 
     // find movies withj specific genre
@@ -156,7 +171,11 @@ public class MovieServiceImpl implements MovieService {
         return movieDtos;
     }
 
-    private Movie convertDtoToEntity(MovieDto movieDto, Movie movie){
+    private Movie convertDtoToEntity(MovieDto movieDto){
+        Movie movie = new Movie();
+        movie.setId(movieDto.getId());
+        movie.setTitle(movieDto.getTitle());
+        movie.setMovieStatus(movieDto.getMovieStatus());
         if (movieDto.getDirectorDto() != null) {
             movie.setDirector(directorServiceImpl.findById(movieDto.getDirectorDto().getId().intValue()));
         }
@@ -164,15 +183,15 @@ public class MovieServiceImpl implements MovieService {
             Studio studio = studioRepository.findById(movieDto.getStudioDto().getId()).orElseThrow(() -> new EntityNotFoundException("Studio with this id doesn't exist"));
             movie.setStudio(studio);
         }
-        if (!movieDto.getGenreDos().isEmpty()) {
+        if (movieDto.getGenreDos() != null && !movieDto.getGenreDos().isEmpty()) {
             List<Genre> genres = genreRepository.findAllById(movieDto.getGenreDos().stream().map(GenreDto::getId).collect(Collectors.toSet()));
             movie.setGenres(genres);
         }
-        if (!movieDto.getReviewDtos().isEmpty()) {
+        if (movieDto.getReviewDtos() != null && !movieDto.getReviewDtos().isEmpty()) {
             List<Review> reviews = reviewRepository.findAllById(movieDto.getReviewDtos().stream().map(ReviewDto::getId).collect(Collectors.toSet()));
             movie.setReviews(reviews);
         }
-        if (!movieDto.getActorDto().isEmpty()) {
+        if (movieDto.getActorDto() != null && !movieDto.getActorDto().isEmpty()) {
             List<Actor> actors = actorRepository.findAllById(movieDto.getActorDto().stream().map(ActorDto::getId).collect(Collectors.toSet()));
             movie.setActors(actors);
         }
@@ -186,10 +205,11 @@ public class MovieServiceImpl implements MovieService {
 //Optimistic and Pessimistic Locking:
     @Override
     @Transactional
-    public void updateMovieTitle(Long id, String newTitle) {
+    public void updateMovieTitle(Long id, String newTitle, MovieStatus movieStatus) {
         Movie movie = movieRepository.findById(id).orElse(null);
         if (movie != null) {
             movie.setTitle(newTitle);
+            movie.setMovieStatus(movieStatus);
         }
     }
 
@@ -211,7 +231,7 @@ public class MovieServiceImpl implements MovieService {
 
     public Movie findMovieWithActorsEntityGraph(Long movieId) {
         EntityGraph<Movie> graph = entityManager.createEntityGraph(Movie.class);
-        graph.addAttributeNodes("actors"); // Use the name of the Entity Graph you defined
+        graph.addAttributeNodes("movie-with-actors"); // the name of the Entity Graph
 
         Map<String, Object> hints = new HashMap<>();
         hints.put("javax.persistence.fetchgraph", graph);
@@ -247,6 +267,7 @@ public class MovieServiceImpl implements MovieService {
         MovieDto movieDto = new MovieDto();
         movieDto.setId(movie.getId());
         movieDto.setTitle(movie.getTitle());
+        movieDto.setMovieStatus(movie.getMovieStatus());
         Set<ActorDto> actorDtos = movie.getActors().stream()
                 .map(actor -> new ActorDto(actor.getId(), actor.getName()))
                 .collect(Collectors.toSet());
@@ -275,11 +296,6 @@ public class MovieServiceImpl implements MovieService {
 
     // get movies with specific genre
     private List<Movie> moviesWithSpecificGenre(String name) {
-//        TypedQuery<Movie> query = entityManager.createQuery(
-//                "SELECT DISTINCT m FROM Movie m JOIN m.genres g WHERE g.name = :genreName",
-//                Movie.class);
-//
-//        query.setParameter("genreName", name);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Movie> cq = cb.createQuery(Movie.class);
@@ -306,6 +322,87 @@ public class MovieServiceImpl implements MovieService {
 
         List<Movie> moviesWithReviews = query.getResultList();
         return moviesWithReviews;
+    }
+
+    private Movie updateAttributes(MovieDto movieDto, Movie movie){
+        if(movieDto.getId()!= null){
+            movie.setId(movieDto.getId());
+        }
+        if(movieDto.getTitle()!= null){
+            movie.setTitle(movieDto.getTitle());
+        }
+        if(movieDto.getMovieStatus()!= null){
+            movie.setMovieStatus(movieDto.getMovieStatus());
+        }
+        if(movieDto.getId()!= null){
+            movie.setId(movieDto.getId());
+        }
+        if (movieDto.getDirectorDto() != null) {
+            movie.setDirector(directorServiceImpl.findById(movieDto.getDirectorDto().getId().intValue()));
+        }
+        if (movieDto.getStudioDto() != null) {
+            Studio studio = studioRepository.findById(movieDto.getStudioDto().getId()).orElseThrow(() -> new EntityNotFoundException("Studio with this id doesn't exist"));
+            movie.setStudio(studio);
+        }
+        if (movieDto.getGenreDos() != null && !movieDto.getGenreDos().isEmpty()) {
+            List<Genre> genres = genreRepository.findAllById(movieDto.getGenreDos().stream().map(GenreDto::getId).collect(Collectors.toSet()));
+            movie.setGenres(genres);
+        }
+        if (movieDto.getReviewDtos() != null && !movieDto.getReviewDtos().isEmpty()) {
+            List<Review> reviews = reviewRepository.findAllById(movieDto.getReviewDtos().stream().map(ReviewDto::getId).collect(Collectors.toSet()));
+            movie.setReviews(reviews);
+        }
+        if (movieDto.getActorDto() != null && !movieDto.getActorDto().isEmpty()) {
+            List<Actor> actors = actorRepository.findAllById(movieDto.getActorDto().stream().map(ActorDto::getId).collect(Collectors.toSet()));
+            movie.setActors(actors);
+        }
+        return movie;
+    }
+
+    @Transactional
+    public MovieDto updateOrAddMovie(MovieDto movieDto) {
+        Movie existingMovie = null;
+        if (movieDto.getId() != null) {
+            existingMovie = movieRepository.findById(movieDto.getId()).orElse(null);
+        }
+
+        Movie movie = (existingMovie != null) ? existingMovie : new Movie();
+
+        movie.setTitle(movieDto.getTitle());
+        movie.setMovieStatus(movieDto.getMovieStatus());
+
+        Director director = directorRepsoitory.findById(movieDto.getDirectorDto().getId())
+                .orElseGet(() -> new Director(movieDto.getDirectorDto().getName()));
+        movie.setDirector(director);
+
+        List<Genre> genres = new ArrayList<>();
+        for (GenreDto genreDto : movieDto.getGenreDos()) {
+            Genre genre = genreRepository.findById(genreDto.getId())
+                    .orElseGet(() -> new Genre(genreDto.getName()));
+            genres.add(genre);
+        }
+        movie.setGenres(genres);
+
+        List<Actor> actors = new ArrayList<>();
+        for (ActorDto actorDto : movieDto.getActorDto()) {
+            Actor actor = actorRepository.findById(actorDto.getId())
+                    .orElseGet(() -> new Actor(actorDto.getName()));
+            actors.add(actor);
+        }
+        movie.setActors(actors);
+
+        List<Review> reviews = new ArrayList<>();
+        for (ReviewDto reviewDto : movieDto.getReviewDtos()) {
+            Review review = reviewRepository.findById(reviewDto.getId())
+                    .orElseGet(() -> new Review(reviewDto.getComment()));
+            reviews.add(review);
+        }
+        movie.getReviews().clear();
+        movie.getReviews().addAll(reviews);
+
+        movie = movieRepository.save(movie);
+
+        return convertEntityToDto(movie);
     }
 
 }

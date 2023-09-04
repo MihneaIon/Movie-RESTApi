@@ -2,13 +2,14 @@ package com.example.demo.mihnea.service;
 
 
 import com.example.demo.mihnea.model.Movie;
+import com.example.demo.mihnea.model.MovieStatus;
 import com.example.demo.mihnea.modelDto.MovieDto;
 
 import java.util.List;
 
 public interface MovieService {
 
-    Movie create(MovieDto movieDto);
+    MovieDto create(MovieDto movieDto);
 
     MovieDto findById(Long id);
 
@@ -17,13 +18,13 @@ public interface MovieService {
     void deleteMovie(Long id);
 
 
-    Movie updateMovie(MovieDto movieDto);
+    MovieDto updateMovie(MovieDto movieDto);
 
     List<MovieDto> findByGenresName(String name);
 
     List<MovieDto> findByTitleContainingIgnoreCase(String name);
 
-    public void updateMovieTitle(Long id, String newTitle);
+    public void updateMovieTitle(Long id, String newTitle, MovieStatus movieStatus);
 
     public List<MovieDto> searchMovies(String keyword);
 
@@ -34,5 +35,7 @@ public interface MovieService {
     public List<MovieDto> findMoviesWithSpecificReview(String name);
 
     public List<MovieDto> findMoviesWithSpecificGenre(String name);
+
+    public MovieDto updateOrAddMovie(MovieDto movieDto);
 
 }

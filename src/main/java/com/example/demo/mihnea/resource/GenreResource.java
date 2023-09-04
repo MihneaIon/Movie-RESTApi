@@ -10,13 +10,13 @@ import java.util.List;
 
 public interface GenreResource {
 
-    public ResponseEntity<Genre> createGenre(GenreDto genreDto);
+    public ResponseEntity<GenreDto> createGenre(GenreDto genreDto);
     //
-    public ResponseEntity<Genre> findGenreById(@PathVariable Long id);
+    public ResponseEntity<GenreDto> findGenreById(@PathVariable Long id);
 
     public ResponseEntity<List<Genre>> findAllGenre();
 
-    public ResponseEntity<Genre> updateGenre(GenreDto genreDto);
+    public ResponseEntity<GenreDto> updateGenre(GenreDto genreDto);
 
     public ResponseEntity<Void> deleteGenre(@PathVariable Long id);
 

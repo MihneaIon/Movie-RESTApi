@@ -11,11 +11,13 @@ public interface StudioService {
 
     StudioDto findById(Integer id);
 
-    List<Studio> findAllStudios();
+    List<StudioDto> findAllStudios();
 
     void deleteStudio(Integer id);
 
     List<StudioDto> getStudiosWithMoreThanXMovies(int numberOfMovies);
 
     Studio updateStudio(StudioDto studioDto);
+
+    StudioDto getStudioWithEagerLoadedMovies(Integer id);
 }

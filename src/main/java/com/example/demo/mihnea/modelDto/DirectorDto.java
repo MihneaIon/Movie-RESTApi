@@ -1,10 +1,16 @@
 package com.example.demo.mihnea.modelDto;
 
-import com.example.demo.mihnea.model.Movie;
-
 import java.util.List;
 
 public class DirectorDto {
+
+
+
+    private Long id;
+
+    private String name;
+
+    private List<MovieDto> movieDto;
 
     public DirectorDto() {
     }
@@ -12,17 +18,11 @@ public class DirectorDto {
         this.id = id;
         this.name = name;
     }
-    public DirectorDto(Long id, String name, List<Movie> movie) {
+    public DirectorDto(Long id, String name, List<MovieDto> movie) {
         this.id = id;
         this.name = name;
-        this.movie = movie;
+        this.movieDto = movie;
     }
-
-    private Long id;
-
-    private String name;
-
-    private List<Movie> movie;
 
     public Long getId() {
         return id;
@@ -40,11 +40,11 @@ public class DirectorDto {
         this.name = name;
     }
 
-    public List<Movie> getMovie() {
-        return movie;
+    public List<MovieDto> getMovieDto() {
+        return movieDto;
     }
 
-    public void setMovie(List<Movie> movie) {
-        this.movie = movie;
+    public void setMovieDto(List<MovieDto> movieDto) {
+        this.movieDto = movieDto;
     }
 }

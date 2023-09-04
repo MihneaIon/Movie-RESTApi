@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,8 +46,12 @@ public class StudioResourceImpl implements StudioResource {
     public ResponseEntity<StudioDto> findStudioById(Integer id) {
 
         final StudioDto foundStudioDto = studioService.findById(id);
-        System.out.println("findStudioById method called with id: " + foundStudioDto.getName());
-        return ResponseEntity.ok(foundStudioDto);
+        if(foundStudioDto != null){
+            System.out.println("findStudioById method called with id: " + foundStudioDto.getName());
+            return ResponseEntity.ok(foundStudioDto);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @Override
@@ -54,8 +60,8 @@ public class StudioResourceImpl implements StudioResource {
     @Operation(summary = "Get studios.", responses = {
             @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
-    public ResponseEntity<List<Studio>> findAllStudies() {
-        final List<Studio> studioList = studioService.findAllStudios();
+    public ResponseEntity<List<StudioDto>> findAllStudies() {
+        final List<StudioDto> studioList = studioService.findAllStudios();
         return ResponseEntity.ok(studioList);
     }
 
@@ -85,9 +91,29 @@ public class StudioResourceImpl implements StudioResource {
     @Override
     @GetMapping("/popular")
     @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get studio.", responses = {
+            @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "405", description = "Method not allowed."),
+            @ApiResponse(responseCode = "500", description = "Internal Error.")})
     public List<StudioDto> getStudioWithMoreThenOneMovie() {
         List<StudioDto> studioDtoList = studioService.getStudiosWithMoreThanXMovies(1);
         return studioDtoList;
+    }
+
+    @Override
+    @GetMapping("/eager-movie")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get studio.", responses = {
+            @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "405", description = "Method not allowed."),
+            @ApiResponse(responseCode = "500", description = "Internal Error.")})
+    public ResponseEntity<StudioDto> getStudioWithEagerLoadedMovies(Integer id) {
+        StudioDto studioDto = studioService.getStudioWithEagerLoadedMovies(id);
+        if(studioDto != null){
+            return ResponseEntity.ok(studioDto);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
 }

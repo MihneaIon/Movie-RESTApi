@@ -1,6 +1,7 @@
 package com.example.demo.mihnea.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 
@@ -9,7 +10,7 @@ public class Review extends BaseClass{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @NotNull
     private String comment;
 
     @ManyToOne

@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 public interface MovieResource {
-    public ResponseEntity<Movie> createMovie(MovieDto movieDto);
+    public ResponseEntity<MovieDto> createMovie(MovieDto movieDto);
     //
     public ResponseEntity<MovieDto> findMovieById(@PathVariable Long id);
 
     public ResponseEntity<List<MovieDto>> findAllMovie();
 
-    public ResponseEntity<Movie> updateMovie(MovieDto movieDto);
+    public ResponseEntity<MovieDto> updateMovie(MovieDto movieDto);
 
     public ResponseEntity<Void> deleteMovie(@PathVariable Long id);
 
@@ -34,4 +34,6 @@ public interface MovieResource {
 
     public ResponseEntity<List<MovieDto>> findMoviesWithSpecificReview(String movieName);
     public ResponseEntity<List<MovieDto>> findMoviesWithSpecificGenre(String genre);
+
+    public ResponseEntity<MovieDto> updateOrAddMovie(MovieDto movieDto);
 }

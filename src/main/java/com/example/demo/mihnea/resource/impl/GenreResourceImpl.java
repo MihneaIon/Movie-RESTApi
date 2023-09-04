@@ -29,9 +29,9 @@ public class GenreResourceImpl implements GenreResource {
     @Operation(summary = "Create a genre.", responses = {
             @ApiResponse(responseCode = "201", description = "The genre was created.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
-    public ResponseEntity<Genre> createGenre(@RequestBody GenreDto genreDto) {
-        final Genre savegenre = genreService.create(genreDto);
-        return ResponseEntity.ok(savegenre);
+    public ResponseEntity<GenreDto> createGenre(@RequestBody GenreDto genreDto) {
+        final GenreDto savedGenre = genreService.create(genreDto);
+        return ResponseEntity.ok(savedGenre);
     }
 
     @Override
@@ -40,9 +40,9 @@ public class GenreResourceImpl implements GenreResource {
     @Operation(summary = "Get studio.", responses = {
             @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
-    public ResponseEntity<Genre> findGenreById(Long id) {
-        final Genre foundGenre = genreService.findById(id);
-        return ResponseEntity.ok(foundGenre);
+    public ResponseEntity<GenreDto> findGenreById(Long id) {
+        final GenreDto foundGenreDto = genreService.findById(id);
+        return ResponseEntity.ok(foundGenreDto);
     }
 
     @Override
@@ -56,8 +56,8 @@ public class GenreResourceImpl implements GenreResource {
     @Operation(summary = "Get studio.", responses = {
             @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
-    public ResponseEntity<Genre> updateGenre(@RequestBody GenreDto genreDto) {
-        final Genre savedGenre = genreService.updateGenre(genreDto);
+    public ResponseEntity<GenreDto> updateGenre(@RequestBody GenreDto genreDto) {
+        final GenreDto savedGenre = genreService.updateGenre(genreDto);
         return ResponseEntity.ok(savedGenre);
     }
 

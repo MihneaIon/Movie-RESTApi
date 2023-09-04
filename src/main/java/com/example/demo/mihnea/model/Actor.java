@@ -1,6 +1,7 @@
 package com.example.demo.mihnea.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ public class Actor extends BaseClass {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private String name;
 
     @ManyToMany(mappedBy = "actors")
@@ -21,7 +23,7 @@ public class Actor extends BaseClass {
         this.name = name;
     }
 
-    public Actor(){
+    public Actor() {
 
     }
 

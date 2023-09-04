@@ -49,21 +49,26 @@ public class StudioServiceImpl implements StudioService {
     @Override
     public StudioDto findById(Integer id) {
         Studio studio = entityManager.find(Studio.class, id);
-        StudioDto studioDto = convertEntityToDto(studio);
-        return studioDto;
+        if(studio != null){
+            StudioDto studioDto = convertEntityToDto(studio);
+            return studioDto;
+        } else {
+            return null;
+        }
+
     }
 
     @Override
-    public List<Studio> findAllStudios() {
-        String jpql = "SELECT s FROM Studio s";
-        TypedQuery<Studio> query = entityManager.createQuery(jpql, Studio.class);
-        return query.getResultList();
+    public List<StudioDto> findAllStudios() {
+        List<Studio> studioList = studioRepository.findAll();
+        return studioList.stream().map(this::convertEntityToDto).toList();
     }
 
     @Override
 //    @Transactional
     public void deleteStudio(Integer id) {
         Studio studio = entityManager.find(Studio.class, id);
+        studio.getProducedMovies().forEach(movie -> movie.setStudio(null));
         entityManager.remove(studio);
     }
 
@@ -100,15 +105,6 @@ public class StudioServiceImpl implements StudioService {
         Studio existingStudio = studioRepository.findById(studioDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Studio was not found!"));
         existingStudio.setName(studioDto.getName());
-
-//        Studio studio = this.findById(studioDto.getId());
-//        if(studioDto.getId() != null){
-//            studio.setName(studioDto.getName());
-//            if(studioDto.getMovieDto() != null){
-//                studio.getProducedMovies().addAll(studioDto.getMovieDto());
-//            }
-//        entityManager.merge(studio);
-//        }
         return existingStudio;
     }
 
@@ -117,14 +113,20 @@ public class StudioServiceImpl implements StudioService {
         return entityManager.find(Studio.class, id); // Lazy loading of movies
     }
 
-    public Studio getStudioWithEagerLoadedMovies(Long id) {
-        EntityGraph<Studio> graph = entityManager.createEntityGraph(Studio.class);
-        graph.addAttributeNodes("movies");
+    public StudioDto getStudioWithEagerLoadedMovies(Integer id) {
+        if(id != null) {
+            EntityGraph<Studio> graph = entityManager.createEntityGraph(Studio.class);
+            graph.addAttributeNodes("producedMovies");
 
-        Map<String, Object> hints = new HashMap<>();
-        hints.put("javax.persistence.loadgraph", graph);
+            Map<String, Object> hints = new HashMap<>();
+            hints.put("javax.persistence.loadgraph", graph);
 
-        return entityManager.find(Studio.class, id, hints); // Eager loading of movies
+            Studio studio = entityManager.find(Studio.class, id, hints); // Eager loading of movies
+            StudioDto studioDto = convertEntityToDto(studio);
+            return studioDto;
+        } else {
+            return null;
+        }
     }
 
     private StudioDto convertEntityToDto(Studio studio){
@@ -153,7 +155,7 @@ public class StudioServiceImpl implements StudioService {
             studio.setProducedMovies(movies);
         }
         Address address = new Address();
-        address.setCity(studioDto.getAddress().getStreet());
+        address.setCity(studioDto.getAddress().getCity());
         address.setStreet(studioDto.getAddress().getStreet());
         address.setZipCode(studioDto.getAddress().getZipCode());
         studio.setAddress(address);

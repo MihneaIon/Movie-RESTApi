@@ -11,12 +11,17 @@ import java.util.Set;
 public interface ActorResource {
 
     public ResponseEntity<Actor> createActor(ActorDto actorDto);
-    //
+
     public ResponseEntity<ActorDto> findActorById(@PathVariable Long id);
 
     public ResponseEntity<Set<ActorDto>> findAllActor();
 
     public ResponseEntity<Actor> updateActor(ActorDto actorDto);
 
-    public ResponseEntity<Void> deleteActor(@PathVariable Long id);
+    public ResponseEntity<Boolean> deleteActor(@PathVariable Long id);
+
+    public ResponseEntity<List<ActorDto>> findActorsByStudioAndDirector(String studioName, String directorName);
+
+    public ResponseEntity<List<ActorDto>> getActorWithMoreThanXMovies(int numberOfMovies);
+
 }

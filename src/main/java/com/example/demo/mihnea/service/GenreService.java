@@ -7,15 +7,15 @@ import java.util.List;
 
 public interface GenreService {
 
-    Genre create(GenreDto genreDto);
+    GenreDto create(GenreDto genreDto);
 
-    Genre findById(Long id);
+    GenreDto findById(Long id);
 
     List<Genre> findAllGenre();
 
     void deleteGenre(Long id);
 
-    Genre updateGenre(GenreDto genreDto);
+    GenreDto updateGenre(GenreDto genreDto);
 
     public void batchInsertGenre(List<Genre> genres);
 

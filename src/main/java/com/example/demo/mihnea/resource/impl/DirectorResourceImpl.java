@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,8 +49,18 @@ public class DirectorResourceImpl implements DirectorResource {
     }
 
     @Override
-    public ResponseEntity<List<Director>> findAllDirector() {
-        return null;
+    @GetMapping()
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get studio.", responses = {
+            @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "500", description = "Internal Error.")})
+    public ResponseEntity<List<DirectorDto>> findAllDirector() {
+        List<DirectorDto> directorDtos = directorService.findAllDirector();
+        if(directorDtos== null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } else {
+            return ResponseEntity.ok(directorDtos);
+        }
     }
 
     @Override
@@ -73,5 +84,20 @@ public class DirectorResourceImpl implements DirectorResource {
     public ResponseEntity<Void> deleteDirector(@RequestParam("id") Long id) {
         directorService.deleteDirector(id.intValue());
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @GetMapping("/director-movies")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get studio.", responses = {
+            @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "500", description = "Internal Error.")})
+    public ResponseEntity<List<DirectorDto>> getDirectorWithMoreThanXMovies(int movieCount) {
+        List<DirectorDto> directorDtos = directorService.getDirectorWithMoreThanXMovies(movieCount);
+        if(directorDtos== null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } else {
+            return ResponseEntity.ok(directorDtos);
+        }
     }
 }

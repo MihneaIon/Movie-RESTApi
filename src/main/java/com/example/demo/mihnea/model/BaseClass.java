@@ -11,8 +11,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-//@EntityListener
-// s(AuditingEntityListener.class)
 @EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
 public class BaseClass implements Serializable {

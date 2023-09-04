@@ -32,8 +32,8 @@ public class MovieResourceImpl implements MovieResource {
     @Operation(summary = "Create a studio.", responses = {
             @ApiResponse(responseCode = "201", description = "The studio was created.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
-    public ResponseEntity<Movie> createMovie(@RequestBody MovieDto movieDto) {
-        final Movie saveMovie = movieService.create(movieDto);
+    public ResponseEntity<MovieDto> createMovie(@RequestBody MovieDto movieDto) {
+        final MovieDto saveMovie = movieService.create(movieDto);
         return ResponseEntity.ok(saveMovie);
     }
 
@@ -70,8 +70,8 @@ public class MovieResourceImpl implements MovieResource {
     @Operation(summary = "Get studio.", responses = {
             @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
-    public ResponseEntity<Movie> updateMovie(@RequestBody MovieDto movieDto) {
-        final Movie saveMovie = movieService.updateMovie(movieDto);
+    public ResponseEntity<MovieDto> updateMovie(@RequestBody MovieDto movieDto) {
+        final MovieDto saveMovie = movieService.updateMovie(movieDto);
         return ResponseEntity.ok(saveMovie);
     }
 
@@ -105,7 +105,7 @@ public class MovieResourceImpl implements MovieResource {
     @PatchMapping("update-title")
     @Produces(MediaType.APPLICATION_JSON)
     public ResponseEntity updateMovieTitle(@RequestBody UpdateMovieTitleDto updateMovieTitleDto) {
-        movieService.updateMovieTitle(updateMovieTitleDto.getId(),updateMovieTitleDto.getNewTitle());
+        movieService.updateMovieTitle(updateMovieTitleDto.getId(),updateMovieTitleDto.getNewTitle(), updateMovieTitleDto.getMovieStatus());
         return ResponseEntity.ok().build();
     }
 
@@ -154,10 +154,31 @@ public class MovieResourceImpl implements MovieResource {
     }
 
     @Override
-
+    @GetMapping("/movie-genre")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get movie.", responses = {
+            @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "405", description = "Method not allowed."),
+            @ApiResponse(responseCode = "500", description = "Internal Error.")})
     public ResponseEntity<List<MovieDto>> findMoviesWithSpecificGenre(String genre) {
         List<MovieDto> movieDtos = movieService.findMoviesWithSpecificGenre(genre);
         return ResponseEntity.ok(movieDtos);
+    }
+
+    @Override
+    @PutMapping("update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get movie.", responses = {
+            @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "405", description = "Method not allowed."),
+            @ApiResponse(responseCode = "500", description = "Internal Error.")})
+    public ResponseEntity<MovieDto> updateOrAddMovie(@RequestBody MovieDto movieDto) {
+        MovieDto newMovieDto = movieService.updateOrAddMovie(movieDto);
+        if(newMovieDto != null){
+            return ResponseEntity.ok(newMovieDto);
+        } else{
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
 }

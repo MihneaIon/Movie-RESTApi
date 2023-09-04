@@ -11,9 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -50,7 +52,7 @@ public class ActorResourceImpl implements ActorResource {
     @Override
     @GetMapping()
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Get studio.", responses = {
+    @Operation(summary = "Get actor.", responses = {
             @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
     public ResponseEntity<Set<ActorDto>> findAllActor() {
@@ -66,7 +68,11 @@ public class ActorResourceImpl implements ActorResource {
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
     public ResponseEntity<Actor> updateActor(@RequestBody ActorDto actorDto) {
         final Actor savedActor = actorService.updateActor(actorDto);
-        return ResponseEntity.ok(savedActor);
+        if(savedActor != null){
+            return ResponseEntity.ok(savedActor);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @Override
@@ -76,8 +82,44 @@ public class ActorResourceImpl implements ActorResource {
             @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
             @ApiResponse(responseCode = "405", description = "Method not allowed."),
             @ApiResponse(responseCode = "500", description = "Internal Error.")})
-    public ResponseEntity<Void> deleteActor(@RequestParam("id") Long id) {
-        actorService.deleteActor(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Boolean> deleteActor(@RequestParam("id") Long id) {
+        if(actorService.deleteActor(id)){
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
+
+    @Override
+    @GetMapping("actors-movie")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get actors .", responses = {
+            @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "500", description = "Internal Error.")})
+    public ResponseEntity<List<ActorDto>> findActorsByStudioAndDirector(String studioName, String directorName) {
+        final List<ActorDto> actorList = actorService.findActorsByStudioAndDirector(studioName,directorName);
+        if(actorList != null && !actorList.isEmpty()){
+            return ResponseEntity.ok(actorList);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+    }
+
+    @Override
+    @GetMapping("popular")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get actors .", responses = {
+            @ApiResponse(responseCode = "200", description = "The studio was taken.", content = @Content(mediaType = MediaType.APPLICATION_JSON)),
+            @ApiResponse(responseCode = "500", description = "Internal Error.")})
+    public ResponseEntity<List<ActorDto>> getActorWithMoreThanXMovies(int numberOfMovies) {
+        final List<ActorDto> actorList = actorService.getActorWithMoreThanXMovies(numberOfMovies);
+        if(actorList != null && !actorList.isEmpty()){
+            return ResponseEntity.ok(actorList);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+
 }

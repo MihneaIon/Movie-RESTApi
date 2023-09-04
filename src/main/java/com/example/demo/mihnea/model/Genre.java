@@ -1,17 +1,18 @@
 package com.example.demo.mihnea.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Genre extends BaseClass{
+public class Genre extends BaseClass {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @NotNull
     private String name;
 
     @ManyToMany(mappedBy = "genres")
@@ -21,7 +22,7 @@ public class Genre extends BaseClass{
         this.name = name;
     }
 
-    public Genre(){
+    public Genre() {
 
     }
 

@@ -2,6 +2,7 @@ package com.example.demo.mihnea.model;
 
 import com.example.demo.mihnea.util.MovieListener;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,13 +18,17 @@ import java.util.List;
         }
 )
 @EntityListeners(MovieListener.class)
-public class Movie extends BaseClass{
+public class Movie extends BaseClass {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private String title;
+
+    @Enumerated(EnumType.STRING)
+    private MovieStatus movieStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "director_id")
@@ -39,13 +44,14 @@ public class Movie extends BaseClass{
     @JoinTable(name = "movie_genre",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    @Enumerated(EnumType.STRING)
     private List<Genre> genres = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "studio_id")
     private Studio studio;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
     // Constructors, getters, setters
@@ -59,9 +65,10 @@ public class Movie extends BaseClass{
         this.title = title;
     }
 
-    public Movie(Long id, String title, Director director, List<Actor> actors, List<Genre> genres, Studio studio, List<Review> reviews) {
+    public Movie(Long id, String title, MovieStatus movieStatus, Director director, List<Actor> actors, List<Genre> genres, Studio studio, List<Review> reviews) {
         this.id = id;
         this.title = title;
+        this.movieStatus = movieStatus;
         this.director = director;
         this.actors = actors;
         this.genres = genres;
@@ -125,11 +132,20 @@ public class Movie extends BaseClass{
         this.reviews = reviews;
     }
 
+    public MovieStatus getMovieStatus() {
+        return movieStatus;
+    }
+
+    public void setMovieStatus(MovieStatus movieStatus) {
+        this.movieStatus = movieStatus;
+    }
+
     @Override
     public String toString() {
         return "Movie{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
+                ", status=" + movieStatus +
                 ", director=" + director +
                 ", actors=" + actors +
                 ", genres=" + genres +

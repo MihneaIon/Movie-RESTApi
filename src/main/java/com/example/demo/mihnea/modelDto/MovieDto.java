@@ -1,5 +1,7 @@
 package com.example.demo.mihnea.modelDto;
 
+import com.example.demo.mihnea.model.MovieStatus;
+
 import java.util.Set;
 
 public class MovieDto {
@@ -7,6 +9,8 @@ public class MovieDto {
     private Long id;
 
     private String title;
+
+    private MovieStatus movieStatus;
 
     private DirectorDto directorDto;
 
@@ -25,9 +29,10 @@ public class MovieDto {
         this.title = title;
     }
 
-    public MovieDto(Long id, String title, DirectorDto directorDto, Set<GenreDto> genreDos, StudioDto studioDto, Set<ActorDto> actorDto, Set<ReviewDto> reviewDtos) {
+    public MovieDto(Long id, String title, MovieStatus movieStatus, DirectorDto directorDto, Set<GenreDto> genreDos, StudioDto studioDto, Set<ActorDto> actorDto, Set<ReviewDto> reviewDtos) {
         this.id = id;
         this.title = title;
+        this.movieStatus = movieStatus;
         this.directorDto = directorDto;
         this.genreDos = genreDos;
         this.studioDto = studioDto;
@@ -48,6 +53,14 @@ public class MovieDto {
     }
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public MovieStatus getMovieStatus() {
+        return movieStatus;
+    }
+
+    public void setMovieStatus(MovieStatus movieStatus) {
+        this.movieStatus = movieStatus;
     }
 
     public DirectorDto getDirectorDto() {

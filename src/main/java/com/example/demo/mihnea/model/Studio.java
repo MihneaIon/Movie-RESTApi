@@ -1,6 +1,7 @@
 package com.example.demo.mihnea.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +14,7 @@ public class Studio extends BaseClass{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
+    @NotNull
     private String name;
 
     @OneToMany(mappedBy = "studio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -31,6 +32,11 @@ public class Studio extends BaseClass{
 
     public Studio(String name) {
         this.name = name;
+    }
+
+    public Studio(String name, Address address) {
+        this.name = name;
+        this.address = address;
     }
 
     public Studio(){

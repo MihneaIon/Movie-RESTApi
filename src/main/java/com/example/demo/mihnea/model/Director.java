@@ -1,16 +1,17 @@
 package com.example.demo.mihnea.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Director extends BaseClass{
+public class Director extends BaseClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @NotNull
     private String name;
 
     @OneToMany(mappedBy = "director")
@@ -24,9 +25,10 @@ public class Director extends BaseClass{
         this.directedMovies = directedMovies;
     }
 
-    public Director(){
+    public Director() {
 
     }
+
     public Director(String name) {
         this.name = name;
     }
