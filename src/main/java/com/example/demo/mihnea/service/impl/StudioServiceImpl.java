@@ -1,14 +1,11 @@
 package com.example.demo.mihnea.service.impl;
 
 
-import com.example.demo.mihnea.model.Actor;
 import com.example.demo.mihnea.model.Address;
 import com.example.demo.mihnea.model.Movie;
 import com.example.demo.mihnea.model.Studio;
-import com.example.demo.mihnea.modelDto.ActorDto;
 import com.example.demo.mihnea.modelDto.MovieDto;
 import com.example.demo.mihnea.modelDto.StudioDto;
-import com.example.demo.mihnea.repository.ActorRepository;
 import com.example.demo.mihnea.repository.StudioRepository;
 import com.example.demo.mihnea.service.StudioService;
 import jakarta.persistence.*;
@@ -31,10 +28,9 @@ public class StudioServiceImpl implements StudioService {
     private StudioRepository studioRepository;
 
     @Override
-//    @Transactional
     public Studio create(StudioDto studioDto) {
         Studio studio;
-        if(studioDto.getId() != null){
+        if (studioDto.getId() != null) {
             studio = entityManager.find(Studio.class, studioDto.getId());
         } else {
             studio = new Studio();
@@ -49,7 +45,7 @@ public class StudioServiceImpl implements StudioService {
     @Override
     public StudioDto findById(Integer id) {
         Studio studio = entityManager.find(Studio.class, id);
-        if(studio != null){
+        if (studio != null) {
             StudioDto studioDto = convertEntityToDto(studio);
             return studioDto;
         } else {
@@ -65,7 +61,6 @@ public class StudioServiceImpl implements StudioService {
     }
 
     @Override
-//    @Transactional
     public void deleteStudio(Integer id) {
         Studio studio = entityManager.find(Studio.class, id);
         studio.getProducedMovies().forEach(movie -> movie.setStudio(null));
@@ -84,15 +79,15 @@ public class StudioServiceImpl implements StudioService {
         cq.having(cb.gt(cb.count(movieJoin), 1));
 
         TypedQuery<Studio> query = entityManager.createQuery(cq);
-        System.out.println("!!!"+query.getResultList());
-        List<Studio> foundStudio =  query.getResultList();
-        Set<StudioDto> studioDtos =  foundStudio.stream()
+        System.out.println("!!!" + query.getResultList());
+        List<Studio> foundStudio = query.getResultList();
+        Set<StudioDto> studioDtos = foundStudio.stream()
                 .map(studio1 -> new StudioDto(studio1.getId(), studio1.getName(), transformMoviesDtoToMovie(studio1.getProducedMovies())))
                 .collect(Collectors.toSet());
         return new ArrayList<>(studioDtos);
     }
 
-    public Set<MovieDto> transformMoviesDtoToMovie(Set<Movie> movieList){
+    public Set<MovieDto> transformMoviesDtoToMovie(Set<Movie> movieList) {
         Set<MovieDto> movies = movieList.stream()
                 .map(movieDto -> new MovieDto(movieDto.getId(), movieDto.getTitle()))
                 .collect(Collectors.toSet());
@@ -100,7 +95,6 @@ public class StudioServiceImpl implements StudioService {
     }
 
     @Override
-//    @Transactional
     public Studio updateStudio(StudioDto studioDto) {
         Studio existingStudio = studioRepository.findById(studioDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Studio was not found!"));
@@ -110,11 +104,11 @@ public class StudioServiceImpl implements StudioService {
 
     // Lazy vs. Eager Loading
     public Studio getStudioWithMovies(Long id) {
-        return entityManager.find(Studio.class, id); // Lazy loading of movies
+        return entityManager.find(Studio.class, id);
     }
 
     public StudioDto getStudioWithEagerLoadedMovies(Integer id) {
-        if(id != null) {
+        if (id != null) {
             EntityGraph<Studio> graph = entityManager.createEntityGraph(Studio.class);
             graph.addAttributeNodes("producedMovies");
 
@@ -129,11 +123,11 @@ public class StudioServiceImpl implements StudioService {
         }
     }
 
-    private StudioDto convertEntityToDto(Studio studio){
+    private StudioDto convertEntityToDto(Studio studio) {
         StudioDto studioDto = new StudioDto();
         studioDto.setId(studio.getId());
         studioDto.setName(studio.getName());
-        if(studio.getProducedMovies() != null){
+        if (studio.getProducedMovies() != null) {
             Set<MovieDto> movieDtos = studio.getProducedMovies().stream()
                     .map(movie -> new MovieDto(movie.getId(), movie.getTitle()))
                     .collect(Collectors.toSet());
@@ -142,13 +136,13 @@ public class StudioServiceImpl implements StudioService {
         return studioDto;
     }
 
-    private Studio convertDtoToEntity(StudioDto studioDto){
+    private Studio convertDtoToEntity(StudioDto studioDto) {
         Studio studio = new Studio();
-        if(studioDto.getId() != null){
+        if (studioDto.getId() != null) {
             studio.setId(studioDto.getId());
         }
         studio.setName(studioDto.getName());
-        if(studioDto.getMovieDto() != null) {
+        if (studioDto.getMovieDto() != null) {
             Set<Movie> movies = studioDto.getMovieDto().stream()
                     .map(movieDto -> new Movie(movieDto.getId(), movieDto.getTitle()))
                     .collect(Collectors.toSet());

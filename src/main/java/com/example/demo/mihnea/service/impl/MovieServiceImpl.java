@@ -1,6 +1,5 @@
 package com.example.demo.mihnea.service.impl;
 
-import com.example.demo.mihnea.mapper.MovieMapper;
 import com.example.demo.mihnea.model.*;
 import com.example.demo.mihnea.modelDto.*;
 import com.example.demo.mihnea.repository.*;
@@ -59,9 +58,6 @@ public class MovieServiceImpl implements MovieService {
     @Autowired
     private DirectorRepsoitory directorRepsoitory;
 
-//    @Autowired
-//    private MovieMapper movieMapper;
-
     @Override
     public MovieDto create(MovieDto movieDto) {
         Director director = directorRepsoitory.findByName(movieDto.getDirectorDto().getName());
@@ -97,9 +93,9 @@ public class MovieServiceImpl implements MovieService {
         }
 
         List<Review> reviews = new ArrayList<>();
-        for(ReviewDto reviewDto : movieDto.getReviewDtos()){
+        for (ReviewDto reviewDto : movieDto.getReviewDtos()) {
             Review existingReview = reviewRepository.findById(reviewDto.getId()).get();
-            if(existingReview == null){
+            if (existingReview == null) {
                 reviews.add(new Review(reviewDto.getComment()));
             } else {
                 reviews.add(existingReview);
@@ -123,8 +119,8 @@ public class MovieServiceImpl implements MovieService {
     @Override
     @Cacheable(value = "movie")
     public MovieDto findById(Long id) {
-            Movie movie = movieRepository.findById(id).orElse(null);
-            return convertEntityToDto(movie);
+        Movie movie = movieRepository.findById(id).orElse(null);
+        return convertEntityToDto(movie);
     }
 
     @Override
@@ -135,7 +131,7 @@ public class MovieServiceImpl implements MovieService {
     @Override
     @Transactional
     public void deleteMovie(Long id) {
-        if(movieRepository.existsById(id)){
+        if (movieRepository.existsById(id)) {
             movieRepository.deleteById(id);
         }
     }
@@ -147,14 +143,14 @@ public class MovieServiceImpl implements MovieService {
             Movie savedMovie = updateAttributes(movieDto, movie);
             movieRepository.saveAndFlush(movie);
             return convertEntityToDto(movie);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             //return new EntityNotFoundException("Movie with ID " + movieDto.getId() + " not found");
             return null;
         }
     }
 
-    // find movies withj specific genre
+    // find movies with specific genre
     @Override
     public List<MovieDto> findByGenresName(String name) {
         List<Movie> movies = movieRepository.findByGenresName(name);
@@ -171,7 +167,7 @@ public class MovieServiceImpl implements MovieService {
         return movieDtos;
     }
 
-    private Movie convertDtoToEntity(MovieDto movieDto){
+    private Movie convertDtoToEntity(MovieDto movieDto) {
         Movie movie = new Movie();
         movie.setId(movieDto.getId());
         movie.setTitle(movieDto.getTitle());
@@ -202,7 +198,7 @@ public class MovieServiceImpl implements MovieService {
         return movieRepository.findByGenre(genreId);
     }
 
-//Optimistic and Pessimistic Locking:
+    //Optimistic and Pessimistic Locking:
     @Override
     @Transactional
     public void updateMovieTitle(Long id, String newTitle, MovieStatus movieStatus) {
@@ -254,8 +250,9 @@ public class MovieServiceImpl implements MovieService {
                 .toList();
         return movieDtos;
     }
+
     @Override
-    public List<MovieDto> findMoviesWithSpecificGenre(String genre){
+    public List<MovieDto> findMoviesWithSpecificGenre(String genre) {
         List<Movie> movieList = moviesWithSpecificGenre(genre);
         List<MovieDto> movieDtos = movieList.stream().map(this::convertEntityToDto)
                 .toList();
@@ -263,7 +260,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
 
-    private MovieDto  convertEntityToDto(Movie movie){
+    private MovieDto convertEntityToDto(Movie movie) {
         MovieDto movieDto = new MovieDto();
         movieDto.setId(movie.getId());
         movieDto.setTitle(movie.getTitle());
@@ -286,8 +283,8 @@ public class MovieServiceImpl implements MovieService {
     }
 
     // get movies with actors having a specific name:
-    List<Movie> moviesWithActor(String name){
-        TypedQuery<Movie> query = entityManager.createQuery( "SELECT m FROM Movie m WHERE EXISTS " +
+    List<Movie> moviesWithActor(String name) {
+        TypedQuery<Movie> query = entityManager.createQuery("SELECT m FROM Movie m WHERE EXISTS " +
                         "(SELECT a FROM Actor a WHERE a.name = :name AND a MEMBER OF m.actors)",
                 Movie.class);
         List<Movie> movieWithActors = query.getResultList();
@@ -324,17 +321,17 @@ public class MovieServiceImpl implements MovieService {
         return moviesWithReviews;
     }
 
-    private Movie updateAttributes(MovieDto movieDto, Movie movie){
-        if(movieDto.getId()!= null){
+    private Movie updateAttributes(MovieDto movieDto, Movie movie) {
+        if (movieDto.getId() != null) {
             movie.setId(movieDto.getId());
         }
-        if(movieDto.getTitle()!= null){
+        if (movieDto.getTitle() != null) {
             movie.setTitle(movieDto.getTitle());
         }
-        if(movieDto.getMovieStatus()!= null){
+        if (movieDto.getMovieStatus() != null) {
             movie.setMovieStatus(movieDto.getMovieStatus());
         }
-        if(movieDto.getId()!= null){
+        if (movieDto.getId() != null) {
             movie.setId(movieDto.getId());
         }
         if (movieDto.getDirectorDto() != null) {

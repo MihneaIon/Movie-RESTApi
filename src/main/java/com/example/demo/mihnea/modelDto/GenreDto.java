@@ -1,8 +1,5 @@
 package com.example.demo.mihnea.modelDto;
 
-import com.example.demo.mihnea.model.GenreEnum;
-import com.example.demo.mihnea.model.Movie;
-
 import java.util.List;
 
 public class GenreDto {

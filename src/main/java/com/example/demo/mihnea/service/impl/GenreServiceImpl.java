@@ -1,9 +1,7 @@
 package com.example.demo.mihnea.service.impl;
 
-import com.example.demo.mihnea.model.Director;
 import com.example.demo.mihnea.model.Genre;
 import com.example.demo.mihnea.model.Movie;
-import com.example.demo.mihnea.modelDto.DirectorDto;
 import com.example.demo.mihnea.modelDto.GenreDto;
 import com.example.demo.mihnea.modelDto.MovieDto;
 import com.example.demo.mihnea.repository.GenreRepository;
@@ -15,7 +13,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,12 +31,12 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public GenreDto create(GenreDto genreDto) {
         Genre genre;
-        if(genreDto.getId() != null){
+        if (genreDto.getId() != null) {
             genre = genreRepository.findById(genreDto.getId()).get();
         } else {
             genre = new Genre();
         }
-        if(genre != null){
+        if (genre != null) {
             genre = convertDtoToEntity(genreDto);
             entityManager.persist(genre);
             entityManager.flush();
@@ -73,7 +70,7 @@ public class GenreServiceImpl implements GenreService {
     @Override
     public GenreDto updateGenre(GenreDto genreDto) {
         Genre genre = genreRepository.findById(genreDto.getId())
-                .orElseThrow(() ->  new EntityNotFoundException("Genre not found!"));
+                .orElseThrow(() -> new EntityNotFoundException("Genre not found!"));
         return convertEntityToDto(genre);
     }
 
@@ -89,11 +86,11 @@ public class GenreServiceImpl implements GenreService {
         }
     }
 
-    private GenreDto convertEntityToDto(Genre genre){
+    private GenreDto convertEntityToDto(Genre genre) {
         GenreDto genreDto = new GenreDto();
         genreDto.setId(genre.getId());
         genreDto.setName(genre.getName());
-        if(genre.getMovies() != null) {
+        if (genre.getMovies() != null) {
             List<MovieDto> movieDtos = genre.getMovies().stream()
                     .map(movie -> new MovieDto(movie.getId(), movie.getTitle()))
                     .collect(Collectors.toList());
@@ -102,13 +99,13 @@ public class GenreServiceImpl implements GenreService {
         return genreDto;
     }
 
-    private Genre convertDtoToEntity(GenreDto genreDto){
+    private Genre convertDtoToEntity(GenreDto genreDto) {
         Genre genre = new Genre();
-        if(genreDto.getId() != null){
+        if (genreDto.getId() != null) {
             genre.setId(genreDto.getId());
         }
         genre.setName(genreDto.getName());
-        if(genreDto.getMovie() != null) {
+        if (genreDto.getMovie() != null) {
             List<Movie> movies = genreDto.getMovie().stream()
                     .map(movieDto -> new Movie(movieDto.getId(), movieDto.getTitle()))
                     .collect(Collectors.toList());
